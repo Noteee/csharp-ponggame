@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using System;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -11,11 +12,22 @@ namespace ponggame
     {
         GraphicsDeviceManager graphics;
         SpriteBatch spriteBatch;
+        SpriteFont score;
+        Texture2D paddleTex, ballTex, gameOverTex;
+        Vector2 ballPos, paddlePos, gameOverPos , scorePos;
+        private bool isGameOver;
+        private float ballXSpeed, ballYSpeed, paddleSpeed;
+        private int actualscore = 0;
+        private bool isPaused;
+        
 
         public Game1()
         {
             graphics = new GraphicsDeviceManager(this);
             Content.RootDirectory = "Content";
+            graphics.PreferredBackBufferHeight = 1000;
+            graphics.PreferredBackBufferWidth = 1900;
+
         }
 
         /// <summary>
@@ -27,7 +39,19 @@ namespace ponggame
         protected override void Initialize()
         {
             // TODO: Add your initialization logic here
+            paddleTex = Content.Load<Texture2D>("paddle2");
+            ballTex = Content.Load<Texture2D>("ball4");
+            gameOverTex = Content.Load<Texture2D>("gameover");
+            score = Content.Load<SpriteFont>("file");
+            ballXSpeed = 10;
+            ballYSpeed = 10;        
+            paddleSpeed = 25;
 
+            ballPos = new Vector2(GraphicsDevice.Viewport.Width / 2 - ballTex.Width / 2, 0);
+            paddlePos = new Vector2(GraphicsDevice.Viewport.Width / 2 - paddleTex.Width / 2, GraphicsDevice.Viewport.Height - paddleTex.Height * 1.5f);
+            gameOverPos = new Vector2(GraphicsDevice.Viewport.Width / 2 - gameOverTex.Width / 2, GraphicsDevice.Viewport.Height / 2 - gameOverTex.Height / 2);
+            scorePos = new Vector2(graphics.GraphicsDevice.Viewport.Width / 2,
+                graphics.GraphicsDevice.Viewport.Height / 2 + 0.13f * ballTex.Height);
             base.Initialize();
         }
 
@@ -39,6 +63,7 @@ namespace ponggame
         {
             // Create a new SpriteBatch, which can be used to draw textures.
             spriteBatch = new SpriteBatch(GraphicsDevice);
+            
 
             // TODO: use this.Content to load your game content here
         }
@@ -59,8 +84,81 @@ namespace ponggame
         /// <param name="gameTime">Provides a snapshot of timing values.</param>
         protected override void Update(GameTime gameTime)
         {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+            
+                if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed ||
+                    Keyboard.GetState().IsKeyDown(Keys.Escape))
+                    Exit();
+            if (!isPaused)
+            {
+                if (!isGameOver)
+                {
+                    ballPos.X += ballXSpeed;
+                    ballPos.Y += ballYSpeed;
+                    if (Keyboard.GetState().IsKeyDown(Keys.Left))
+                    {
+                        paddlePos.X -= paddleSpeed;
+                    }
+                    if (Keyboard.GetState().IsKeyDown(Keys.Right))
+                    {
+                        paddlePos.X += paddleSpeed;
+                    }
+                    if (ballPos.X <= 0)
+                    {
+                        ballXSpeed *= -1;
+                    }
+                    if (ballPos.Y <= 0)
+                    {
+                        ballYSpeed *= -1;
+                    }
+                    if (ballPos.X >= GraphicsDevice.Viewport.Width - ballTex.Width)
+                    {
+                        ballXSpeed *= -1;
+                    }
+                    if (ballPos.Y >= paddlePos.Y - ballTex.Width)
+                    {
+                        if (ballPos.X + ballTex.Width >= paddlePos.X & ballPos.X <= paddlePos.X + paddleTex.Width)
+                        {
+                            ballYSpeed *= -1.1f;
+                            actualscore++;
+                        }
+                    }
+                    
+
+                    if (ballPos.Y >= GraphicsDevice.Viewport.Height - ballTex.Width)
+                    {
+                        isGameOver = true;
+                    }
+                }
+
+                if (Keyboard.GetState().IsKeyDown(Keys.P))
+                {
+                  
+                    isPaused = true;
+                }
+
+            }
+            if (isPaused)
+            {
+                if (Keyboard.GetState().IsKeyDown(Keys.P))
+                {
+                    isPaused = false;
+                }
+            }
+
+            if (isGameOver)
+            {
+                if (Keyboard.GetState().IsKeyDown(Keys.R))
+                {
+                    ballPos = new Vector2(GraphicsDevice.Viewport.Width / 2 - ballTex.Width / 2, 0);
+                    paddlePos = new Vector2(GraphicsDevice.Viewport.Width / 2 - paddleTex.Width / 2, GraphicsDevice.Viewport.Height - paddleTex.Height * 1.5f);
+                    ballXSpeed = 10;
+                    ballYSpeed = 10;
+                    isGameOver = false;
+                    actualscore = 0;
+                }
+            }
+
+
 
             // TODO: Add your update logic here
 
@@ -74,7 +172,25 @@ namespace ponggame
         protected override void Draw(GameTime gameTime)
         {
             GraphicsDevice.Clear(Color.CornflowerBlue);
-
+            spriteBatch.Begin();
+            string output = "Score: " + actualscore.ToString();
+            Vector2 FontOrigin = score.MeasureString(output) / 2;
+            
+            if (!isGameOver)
+            {
+            spriteBatch.Draw(ballTex, ballPos, null);
+            spriteBatch.Draw(paddleTex, paddlePos, null);
+            spriteBatch.DrawString(score, output, scorePos, Color.Red,
+                0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+            }
+            if (isGameOver)
+            {
+                spriteBatch.Draw(gameOverTex, gameOverPos, null);
+                spriteBatch.DrawString(score, output, scorePos, Color.Red,
+                    0, FontOrigin, 1.0f, SpriteEffects.None, 0.5f);
+            }
+                
+            spriteBatch.End();
             // TODO: Add your drawing code here
 
             base.Draw(gameTime);

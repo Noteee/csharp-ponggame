@@ -53,6 +53,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Content Include="Content\ball2.png" />
+    <Content Include="Content\ball3.png" />
+    <Content Include="Content\ball4.png" />
+    <Content Include="Content\paddle.png" />
+    <Content Include="Content\ball.png" />
+    <Content Include="Content\gameover.png" />
+    <Content Include="Content\paddle1.png" />
+    <Content Include="Content\paddle2.png" />
     <Content Include="Icon.ico" />
   </ItemGroup>
   <ItemGroup>
