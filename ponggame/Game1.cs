@@ -27,6 +27,8 @@ namespace ponggame
             Content.RootDirectory = "Content";
             graphics.PreferredBackBufferHeight = 1000;
             graphics.PreferredBackBufferWidth = 1900;
+            graphics.IsFullScreen = true;
+
 
         }
 
@@ -40,7 +42,11 @@ namespace ponggame
         {
             // TODO: Add your initialization logic here
             paddleTex = Content.Load<Texture2D>("paddle2");
-            ballTex = Content.Load<Texture2D>("ball4");
+            ballTex = Content.Load<Texture2D>("ball2");
+            if (actualscore > 5)
+            {
+                ballTex = Content.Load<Texture2D>("ball3");
+            }
             gameOverTex = Content.Load<Texture2D>("gameover");
             score = Content.Load<SpriteFont>("file");
             ballXSpeed = 10;
@@ -119,10 +125,16 @@ namespace ponggame
                         if (ballPos.X + ballTex.Width >= paddlePos.X & ballPos.X <= paddlePos.X + paddleTex.Width)
                         {
                             ballYSpeed *= -1.1f;
+                            ballXSpeed *= 1.15f;
+                            paddleSpeed *= 1.025f;
                             actualscore++;
                         }
                     }
-                    
+                    if (Keyboard.GetState().IsKeyDown(Keys.F))
+                    {
+                        graphics.IsFullScreen = !graphics.IsFullScreen;
+                    }
+
 
                     if (ballPos.Y >= GraphicsDevice.Viewport.Height - ballTex.Width)
                     {
